@@ -19,17 +19,24 @@ export class Dialog {
         this.origin = new Point();
         this.rotation = 0;
         this.sideValue = 0;
+        // 마우스 클릭
         this.isDown = false;
     }
 
-    resize(stageWidth, stageHeight) {
+    resize(stageWidth, stageHeight) 
+    {
+        // 포스트잇 좌표
         this.pos.x = Math.random() * (stageWidth - WIDTH);
         this.pos.y = Math.random() * (stageHeight - HEIGHT);
+
         this.target = this.pos.clone();
         this.prevPos = this.pos.clone();
     }
 
-    animate(ctx) {
+    animate(ctx) 
+    {
+        // 움직일 방향 : (목표 좌표) - (현재 좌표)
+        // FOLLOW_SPEED 만큼 속도로 움직이게
         const move = this.target.clone().subtract(this.pos).reduce(FOLLOW_SPEED);
         this.pos.add(move);   
         
