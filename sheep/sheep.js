@@ -18,7 +18,8 @@ fps(frame per sec) 개념을 적용하여 양이 움직이는 것을 구현한�
     - animate() : 이미지 좌표와 크기 계산해서 출력
 */
 
-export class Sheep {
+export class Sheep 
+{
     constructor(img, stageWidth) 
     {
         this.img = img;
