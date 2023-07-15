@@ -1,18 +1,23 @@
 export class Hill {
-    constructor(color, speed, total) {
+    constructor(color, speed, total) 
+    {
         this.color = color;
         this.speed = speed;
         this.total = total; // 언덕의 포인트들의 갯수
     }
 
-    resize(stageWidth, stageHeight) {
+    // 객체의 원하는 크기와 위치를 설정 
+    // >> 필요한 위치값 혹은 크기값은 무엇일까 고민하기
+    resize(stageWidth, stageHeight) 
+    {
         this.stageWidth = stageWidth;
         this.stageHeight = stageHeight;
 
         this.points = [];
         this.gap = Math.ceil(this.stageWidth / (this.total - 2)); // 간격을 조금 더 넓게 정의
         
-        for(let i=0; i<this.total; i++) {
+        for(let i=0; i<this.total; i++) 
+        {
             this.points[i] = {
                 x: i * this.gap,
                 y: this.getY()
@@ -20,8 +25,8 @@ export class Hill {
         }
     }
 
-    // 언덕을 그리는 함수
-    // 로직이 꽤 어려움
+    // 객체를 그리는 함수
+    // >> 애니메이션은 각각 프레임마다의 사진을 정의해야함
     draw(ctx) {
         ctx.fillStyle = this.color;
         ctx.beginPath();
@@ -38,16 +43,17 @@ export class Hill {
                 x: -(this.gap * 2),
                 y: this.getY()
             });
-        } else if(cur.x > this.stageWidth + this.gap) {
+        } 
+        else if(cur.x > this.stageWidth + this.gap) 
             this.points.splice(-1);
-        }
+        
 
         ctx.moveTo(cur.x, cur.y);
 
         let prevCx = cur.x;
         let prevCy = cur.y;
-        for(let i=1; i<this.points.length; i++) {
-
+        for(let i=1; i<this.points.length; i++) 
+        {
             cur = this.points[i];
             cur.x += this.speed;    
             const cx = (prev.x + cur.x) / 2;
@@ -76,7 +82,8 @@ export class Hill {
     }
 
     // 언덕의 y값을 랜덤으로 주는 함수
-    getY() {
+    getY() 
+    {
         const min = this.stageHeight / 8;
         const max = this.stageHeight - min;
         return min + Math.random() * max;
