@@ -1,0 +1,19 @@
+.sticker {
+    width: 180px;
+    height: 180px;
+}
+
+/* add image */
+.example-1 .sticker-img {
+    background-image: url();
+}
+
+/* add color */
+.example-1 .sticker-img {
+    background-color: #ff4a85;
+}
+
+/* change shadow opacity */
+.example-1 .sticker-shadow {
+    opacity: 0.6;
+}
