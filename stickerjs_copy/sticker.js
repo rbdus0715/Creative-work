@@ -1,8 +1,9 @@
 (function() 
 {
     // 전역 변수
-    var _prefixes = ['webkit', 'Moz', 'ms', 'O'];
-        _direction = null;
+    var _prefixes = ['webkit', 'Moz', 'ms', 'O'],
+        _direction = null,
+        _savePos = null,
         _aniTrans = 'all 0.6s cubic-bezier(.23,1,.32,1)', // transition 속성
         _setTrans = 'all 0s', // 첫 세팅
 
@@ -66,6 +67,11 @@
             value, 
             a = size - tx, b = size - ty, 
             c = tx >> 1, d = ty >> 1, e = a >> 1, f = b >> 1;
+        
+        /**
+         * bx, by : back의 좌표
+         * 
+         */
         if (_direction == 0) value = {bx:-size, by:0, sx:-1, sy:1, bs:'shadowL', bmx:-size + tx, bmy:0, bsw:tx, bsh:size, bsx:a, bsy:0, cw:size - c, ch:size, cx:c, cy:0, dw:c, dh:size, dx:c - (c >> 1), dy:0}; // left
         else if (_direction == 1) value = {bx:size, by:0, sx:-1, sy:1, bs:'shadowR', bmx:tx, bmy:0, bsw:a, bsh:size, bsx:0, bsy:0, cw:size - e, ch:size, cx:0, cy:0, dw:e, dh:size, dx:size - a + (e >> 1), dy:0}; // right
         else if (_direction == 2) value = {bx:0, by:-size, sx:1, sy:-1, bs:'shadowT', bmx:0, bmy:-size + ty, bsw:size, bsh:ty, bsx:0, bsy:b, cw:size, ch:size - d, cx:0, cy:d, dw:size, dh:d, dx:0, dy:d - (d >> 1)}; // top
@@ -98,21 +104,75 @@
         });
         css(value.move, {
             transition: _setTrans,
-            transform: 'translate(' + 0 + 'px, ' + 0 + 'px)'
+            transform: 'translate(' + 0 + 'px, ' + 0 + 'px)',
         });
-        
+        css(value.back, {
+            transition: _setTrans,
+            transform: 'translate(' + bx + 'px, ' + by + 'px)',
+        });
+        css(value.depth, {
+            transform: 'translate(' + -10000 + ' px, ' + -10000 + 'px)',
+        });
+        _savePos = null;
     }
 
     function onLeave(e, value) {
-
+        if(_savePos == null) return;
+        var bx = _savePos.bx, by = _savePos.by;
+        css(value.mask, {
+            transition: _aniTrans,
+            width: value.size + 'px',
+            height: value.size + 'px',
+            transform: 'translate(' + 0 + 'px, ' + 0 + 'px)',
+        });
+        css(value.move, {
+            transition: _aniTrans,
+            transform: 'translate(' + 0 + 'px, ' + 0 + 'px)',
+        });
+        css(value.back, {
+            transition: _aniTrans,
+            transform: 'translate(' + bx + 'px, ' + by + 'px)',
+        });
+        css(value.depth, {
+            transform: 'translate(' + -10000 + 'px, ' + -10000 + 'px)',
+        });
+        _savePos = null;
     }
 
     function onMove(e, value) {
-
+        if(_savePos == null) return;
+        
+        var pos = checkPos(e, _savePos.pos, value.size),
+            bmx = pos.bmx, bmy = pos.bmy,
+            bsw = pos.bsw, bsh = pos.bsh, bsx = pos.bsx, bsy = pos.bsy,
+            cw = pos.cw, ch = pos.ch, cx = pos.cx, cy = pos.cy,
+            dw = pos.dw, dh = pos.dh, dx = pos.dx, dy = pos.dy;     
+    
+        css(value.mask, {
+            width: cw + 'px',
+            height: ch + 'px',
+            transform: 'translate(' + cx + 'px, ' + -cy + 'px',
+        });
+        css(value.move, {
+            transform: 'translate(' + -cx + 'px, ' + -cy + 'px)',
+        });
+        css(value.backShadow, {
+            width: bsw + 'px',
+            height: bsh + 'px',
+            transform: 'translate(' + bsx + 'px, ' + bsy + 'px)'
+        });
+        css(value.depth, {
+            width: dw + 'px',
+            height: dh + 'px',
+            transform: 'translate(' + dx + 'px, ' + dy + 'px)'
+        });
     }
+
 
     var sticker = {
         init: function init(dom) {
+            // querySelectorAll을 통해 특정 선택자가 포함된 것을 init에 의해 전부 초기화한다.
+            // ex) .my-sticker 있는 태그 전부 초기화
             if(typeof dom === 'string') {
                 var item = document.querySelectorAll(dom), i, total = item.length;
                 for(i=0; i<total; i++) init(item[i]);
@@ -149,10 +209,57 @@
                     height: size + 'px',
                     zIndex: 1,
                 });
+                back = createEl('div', {
+                    position: 'absolute',
+                    borderRadius: '50%',
+                    width: size + 'px',
+                    height: size + 'px',
+                    left: '0',
+                    top: '0',
+                    zIndex: 3,
+                    backgroundColor: '#ffffff',
+                    transform: 'translate(' + size + 'px, ' + 0 + 'px)',
+                    overflow: 'hidden'
+                });
+                backImg = cleateEl('div', {
+                    position: 'relative',
+                    borderRadius: '50%',
+                    width: size + 'px',
+                    height: size + 'px',
+                    opacity: '0.4',
+                });
+                backShadow = createEl('div', {
+                    position: 'absolute',
+                    width: size + 'px',
+                    height: size + 'px',
+                    left: '0',
+                    top: '0',
+                    zIndex: 4,
+                });
+                depth = createEl('div', {
+                    position: 'absolute',
+                    width: size + 'px',
+                    height: size + 'px',
+                    left: '0',
+                    top: '0',
+                    zIndex: 1,
+                });
+                
             
             front.className = 'sticker-img sticker-front';
             backImg.className = 'sticker-img sticker-back';
             backShadow.className = depth.className = 'sticker-shadow';
+            /**
+             * [구조]
+             * -container
+             *    -mask
+             *       -move
+             *          -front
+             *          -depth
+             *          -back
+             *             -backImg
+             *             -backShadow        
+             */
             dom.appendChild(container);
             container.appendChild(mask);
             mask.appendChild(move);
@@ -179,10 +286,10 @@
             }, false);
             dom.addEventListener('mouseleave', function(e) {
                 onLeave(e, value);
-            });
+            }, false);
             dom.addEventListener('mousemove', function(e){
                 onMove(e, value);
-            });
+            }, false);
 
             return this;
         }
